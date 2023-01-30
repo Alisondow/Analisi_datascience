@@ -1,0 +1,3325 @@
+---
+  title: "nuovo"
+author: "Borsoi Allison"
+date: "15/9/2022"
+output: html_document
+---
+  
+  ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# I giochi olimpici 
+
+# Analisi 
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(plotly)
+```
+#Dati 
+
+```{r}
+dati = read.csv("athlete_events.csv")
+View(dati)
+
+eventi = read.csv("athlete_events.csv") %>%
+  select(ID:Age, NOC:Medal, -City, -Games)
+View(eventi)
+
+stati = read.csv("noc_regions.csv")
+View(stati)
+
+```
+
+#Analisi generale 
+```{r}
+# 66 sport totali 
+eventi %>%
+  count(Sport)
+
+a = eventi %>% 
+  group_by(Sport, ID) %>% 
+  count(Year)
+ggplot(a) + 
+  geom_bar(aes(Sport)) + 
+  coord_flip()
+
+# 35 edizioni totali 
+eventi %>%
+  group_by(ID) %>%
+  count(Year) 
+
+# numero atleti partecipanti
+eventi %>% 
+  group_by(ID)
+
+# atleta più giovane
+eventi %>%
+  filter(Age == 10)
+
+#atleta più vecchio 
+eventi %>%
+  filter(Age == 97)
+```
+
+```{r}
+#n partecipanti per ogni edizione 
+# 1896   176
+# 1900  1224
+# 1904   650
+# 1906   841
+# 1908  2024
+# 1912  2409
+# 1920  2676
+# 1924  3565
+# 1928  3703
+# 1932  2174
+# 1936  5142
+# 1948  5068
+# 1952  5622
+# 1956  4167
+# 1960  6017
+# 1964  6230
+# 1968  6717
+# 1972  8122
+# 1976  7200
+# 1980  6330
+# 1984  8067
+# 1988  9873
+# 1992 11183
+# 1994  1738
+# 1996 10339
+# 1998  2179
+# 2000 10647
+# 2002  2399
+# 2004 10557
+# 2006  2494 
+# 2008 10899
+# 2010  2536
+# 2012 10517
+# 2014  2745
+# 2016 11179
+```
+# Edizioni dei giochi 
+
+# EDIZIONE 1896
+```{r}
+# EDIZIONE 1896
+# sede: Atene, Grecia 
+# ? stata un edizione estiva
+# hanno partecipato solo maschi 
+
+ed_96 = eventi %>%
+  filter(Year == "1896") 
+view(ed_96)
+
+#nel 1896 questi sono i paesi che hanno partecipato: AUS, AUT, DEN, FRA, GBR, GER, GRE, HUN, ITA, SUI, SWE, USA 
+# 12 paesi 
+# GRE ? il paese con pi? partecipanti, quasi 150 
+ed_96 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_96) +
+  geom_bar(mapping = aes(x = NOC))
+
+#nel 1896 hanno partecipato solo maschi 
+sesso = ed_96 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Athletics, Cycling, Fencing, Gymnastics, Shooting, Swimming, Tennis, Weighlifting, Wrestling 
+# 9 sport 
+# lo sport pi? praticato ? Athletics
+ed_96 %>% 
+  group_by(Sport) %>% 
+  summarise(count = n()) 
+
+stato = ed_96 %>% 
+  group_by(Sport) %>% 
+  summarise(count = n())
+
+max(stato$count)
+max(stato$Sport)
+
+
+ggplot(data = ed_96) +
+  geom_bar(mapping = aes(x = Sport))
+
+#et? dei partecipanti: da 10 a 40 
+# et? dei parteciapnti con una medaglia : da 10 a 40 con NA
+#                                       da 10 a 36 senza NA
+ggplot(data = ed_96) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_96, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 10 GRE
+# atleta pi? vecchio: 40 USA
+ggplot(data = ed_96, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: GRE
+n_med = ed_96 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count))
+
+```
+
+# EDIZIONE 1900
+```{r}
+# EDIZIONE 1900
+# sede: Parigi, Francia 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+
+ed_900 = eventi %>%
+  filter(Year == "1900") 
+view(ed_900)
+
+#nel 1900 questi sono i paesi che hanno partecipato: USA, SWE, SUI, RUS, ROU, PER, NZL, NOR, NED, MEX, LUX, ITA, IRI, IND, HUN, HAI, GRE, GER, GBR, FRA, ESP, DEN, CUB, COL, CAN, BRA, BOH, BEL, AUT, AUS, ARG  
+#31 paesi 
+# FRA ? il paese con pi? partecipanti, + 1000  
+ed_900 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_900) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1900 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 23 donne 
+sesso = ed_900 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+View(sesso)
+
+si = sesso %>%
+  group_by(Sex) %>%
+  count(Sex) 
+sum(si$n)
+
+manWoman = eventi %>%
+  group_by(Year) %>%
+  count(Sex)
+View(manWoman)
+
+man = manWoman %>% 
+  filter(Sex == "M")
+ggplot(data = man, mapping = aes(x = Year)) + 
+  geom_freqpoly(mapping = aes(colour = Sex))
+
+ggplot(data = manWoman, mapping = aes(x = Year)) + 
+  geom_freqpoly(mapping = aes(colour = Sex), binwidth = 4)
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Water Polo, Tug-Of-War, Tennis, Swimming, Shooting, Sailing, Rugby, Rowing, Polo, Gymnastics, Golf, Football, Fencing, Cycling, Equestrianism, Croquet, Cricket, Basque Pelota, Athletics, Archery 
+# Basque Pelota ? l'unica edizione in cui si ? svolta, solo 2 squadre: Francia e Spagna; Francia si ritira e vince la Spagna 
+#20 sport 
+# lo sport pi? praticato ? Fencing 
+ed_900 %>% 
+  group_by(Sport) %>% 
+  summarise(count = n())
+
+ggplot(data = ed_900) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 13 a 71 
+#et? dei parteciapnti con una medaglia : da 13 a 71 con NA
+#                                       da 15 a 71 senza NA
+ggplot(data = ed_900) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_900, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 13 FRA
+# atleta pi? vecchio: 71 FRA
+ggplot(data = ed_900, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: FRA
+n_med = ed_900 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count))
+
+```
+
+# EDIZIONE 1904
+```{r}
+# EDIZIONE 1904
+# sede: St. Louis, USA
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+
+ed_904 = eventi %>%
+  filter(Year == "1904") 
+view(ed_904)
+
+#nel 1904 questi sono i paesi che hanno partecipato: AUS, AUT, CAN, CUB, FRA, GBR, GER, GRE, HUN, ITA, NFL, NOR, RSA, SUI, USA
+#15 paesi 
+# USA ? il paese con pi? partecipanti, + 1000
+ed_904 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_904) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1904 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 6 donne 
+sesso = ed_904 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightilfting, Tug-of-War, Tennis, Swimming, Rowing, Roque, Lacrosse, Gymnastics, Golf, Football, Fencing, Diving, Cycling, BOxing, Athletics, Archery 
+#18 sport
+# lo sport pi? praticato ? Gymnastics 
+ed_904 %>% 
+  group_by(Sport) %>% 
+  summarise(count = n())
+
+
+ggplot(data = ed_904) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 14 a 71 
+#et? dei parteciapnti con una medaglia : da 14 a 71 con NA
+#                                       da 14 a 68 senza NA
+ggplot(data = ed_904) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_904, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 14 USA
+# atleta pi? vecchio: 71 USA
+ggplot(data = ed_904, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: USA
+n_med = ed_904 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count))
+
+```
+
+# EDIZIONE 1906 
+```{r}
+# EDIZIONE 1906
+# sede: Londra, UK 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+
+ed_906 = eventi %>%
+  filter(Year == "1906") 
+view(ed_906)
+
+#nel 1906 questi sono i paesi che hanno partecipato: USA, TUR, SWE, SUI, NOR, NED, ITA, HUN, GRE, GER, GBR, FRA, FIN, EGY, DEN, CRT, CAN, BOH, BEL, AUT, AUS
+#21 paesi 
+# GRE ? il paese con pi? partecipanti, + 450
+ed_906 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_906) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1906 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 6 donne 
+sesso = ed_906 %>% 
+  group_by(Sex) %>% 
+  summarise(count = n())
+View(sesso)
+
+sex = full_join(ed_906, sesso)
+View(sex)
+
+ggplot(data = sex) +
+  geom_bar(mapping = aes(x = Sex))
+
+#gli sport praticati sono: Wrestling, Weightilfting, Tug-of-War, Tennis, Swimming, Shooting, Rowing, Gymnastics, Football, Fencing, Diving, Cycling, Athletics 
+# 13 paesi
+# lo sport pi? praticato ? Athletics  
+ed_906 %>% 
+  group_by(Sport) %>% 
+  summarise(count = n())
+
+ggplot(data = ed_906) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 13 a 54
+#et? dei parteciapnti con una medaglia : da 14 a 54 con NA
+#                                       da 13 a 54 senza NA
+ggplot(data = ed_906) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_906, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 13 TUR
+# atleta pi? vecchio: 54 FRA
+ggplot(data = ed_906, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: GRE
+n_med = ed_906 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count))
+
+```
+
+# EDIZIONE 1908 
+```{r}
+# EDIZIONE 1908
+# sede: Londra, UK 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_908 = eventi %>%
+  filter(Year == "1908") 
+view(ed_908)
+
+#nel 1908 questi sono i paesi che hanno partecipato: USA, SWE, SUI, RUS, RSA, NOR, NED, ITA, ISL, HUN, GRE, GER, GBR, FRA, FIN, DEN, CAN, BOH, BEL, AUT, ARG, ANZ 
+#22 paesi
+# GBR ? il paese con pi? partecipanti, + 900
+ed_908 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_908) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1908 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 44 donne 
+sesso = ed_908 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Water Polo, Tug-of-War, Tennis, Swimming, Shooting, Sailing, Rugby, Rowing, Racquets, Polo, Motorboating, Lacrosse, Jeu De Paume, Hockey, Gymnastics, Football, Figure Skating, Fencing, Diving, Cycling, Boxing, Athletics, Archery 
+#24 sport
+# lo sport pi? praticato ? Athletics  
+ed_908 %>% 
+  group_by(Sport) %>% 
+  summarise(count = n())
+
+ggplot(data = ed_908) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 14 a 61
+#et? dei parteciapnti con una medaglia : da 14 a 61 con NA
+#                                       da 16 a 60 senza NA
+ggplot(data = ed_908) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_908, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 14 HUN
+# atleta pi? vecchio: 61 GBR
+ggplot(data = ed_908, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: GBR
+n_med = ed_908 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count))
+
+```
+
+# EDIZIONE 1920 
+```{r}
+# EDIZIONE 1920
+# sede: Antwerpen,  
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_920 = eventi %>%
+  filter(Year == "1920") 
+view(ed_920)
+
+#nel 1920 questi sono i paesi che hanno partecipato: ARG, AUS, BEL, BRA, CAN, CHI, DEN, EGY, ESP, EST, FIN, FRA, GBR, GRE, IND, ITA, JPN, LUX, MON, NED, NOR, NZL, POR, RSA, SUI, SWE, TCH, USA, YUG
+#29 paesi
+# BEL ? il paese con pi? partecipanti, + 500
+ed_920 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_920) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1920 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 78 donne 
+sesso = ed_920 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weighlifting, Water Polo, TUg-of-War, Tennis, Swimming, Shooting, Sailing, Rugby, ROwing, Polo, Modern Pentathlon, Ice Hockey, Hockey, Gymnastics, FOotball, Figure Skating, Fencing, Equestrianism, Diving, Cycling, Boxing, Athletics, Art Competitions, Archery
+#25 sport
+# lo sport pi? praticato ? Athletics  
+ed_920 %>% 
+  group_by(Sport) %>% 
+  summarise(count = n())
+
+ggplot(data = ed_920) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 13 a 72
+#et? dei parteciapnti con una medaglia : da 13 a 72 con NA
+#                                       da 13 a 72 senza NA
+ggplot(data = ed_920) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_920, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 13 USA, SWE 
+# atleta pi? vecchio: 72 SWE 
+ggplot(data = ed_920, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: USA, BEL 
+n_med = ed_920 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count))
+
+```
+
+# EDIZIONE 1924
+```{r}
+# EDIZIONE 1924
+# sede: Paris, FRA 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_924 = eventi %>%
+  filter(Year == "1924") 
+view(ed_924)
+
+#nel 1924 questi sono i paesi che hanno partecipato: ARG, AUS, AUT, BEL, BRA, BUL, CAN, CHI, CUB, DEN, ECU, EGY, ESP, EST, FIN, FRA, GBR, GRE, HAI, HUN, IND, IRL, ITA, JPN, LAT, LTU, LUX, MEX, MON, NED, NEP, NOR, NZL, PHI, POL, POR, ROU, RSA, RUS, SUI, SWE, TCH, TUR, URU, USA, YUG
+#46 paesi
+# FRA ? il paese con pi? partecipanti, + 700
+ed_924 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_924) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1924 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 169 donne 
+sesso = ed_924 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightlifting, Water Polo, Tennis, Swimming, Speed Skating, Ski Jumping, Shooting, Sailing, Rugby, Rowing, Polo, Nordic Combined, Modern Pentathlon, Military Ski Patrol, Ice Hockey, Gymnastics, Football, Figure Skating, Fencing, Equestrianism, Diving, Cycling, Curling, Bobsleigh, Boxing, Athletics, Art Competitions, Alpinism  
+#30 sport 
+# lo sport pi? praticato ? Athletics  
+ed_924 %>% 
+  group_by(Sport) %>% 
+  summarise(count = n())
+
+ggplot(data = ed_924) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 11 a 81
+#et? dei parteciapnti con una medaglia : da 11 a 81 con NA
+#                                       da 14 a 58 senza NA
+ggplot(data = ed_924) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_924, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 11 NOR
+# atleta pi? vecchio: 81 FRA
+ggplot(data = ed_924, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: USA
+n_med = ed_924 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1928
+```{r}
+# EDIZIONE 1928
+# sede: Amsterdam, 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_928 = eventi %>%
+  filter(Year == "1928") 
+view(ed_928)
+
+#nel 1908 questi sono i paesi che hanno partecipato: ARG, AUS, AUT, BEL, BUL, CAN, CHI, CUB, DEN, EGY, ESP, EST, FIN, FRA, GBR, GRE, GER, HAI, HUN, IND, IRL, ITA, LAT, LTU, LUX, MEX, MLT, MON, NED, NOR, NZL, PAN, PHI, POL, POR, ROU, RSA, SUI, SWE, TCH, TUR, URU, USA, YUG, ZIM 
+#46 paesi
+# USA  ? il paese con pi? partecipanti, + 450  
+# stati maggiori: USA, GER, FRA 
+ed_928 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_928) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1908 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 340 donne 
+sesso = ed_928 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+sesso %>% 
+  filter(Sex == "F")
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightlifting, Water Polo, Swimming, Speed Skating, Ski Jumping, Skeleton, Sailing, Rowing, Nordic Combined, Modern Pentathlon, Ice Hockey, Hockey, Gymnastics, Football, Figure Skating, Fencing, Equestrianism, Diving, Cycling, Cross Country Skiing, Bobsleigh, Athletics, Art Competitions 
+#25 sport
+# lo sport pi? praticato ? Athletics  
+ed_928 %>% 
+  group_by(Sport) %>% 
+  summarise(count = n())
+
+ggplot(data = ed_928) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 11 a 97
+#et? dei parteciapnti con una medaglia : da 11 a 97 con NA
+#                                       da 11 a 63 senza NA
+ggplot(data = ed_928) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_928, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 11 ITA 
+# atleta pi? vecchio: 97 USA 
+ggplot(data = ed_928, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: USA
+n_med = ed_928 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1932
+```{r}
+# EDIZIONE 1932
+# sede: Los Angeles  
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_932 = eventi %>%
+  filter(Year == "1932") 
+view(ed_932)
+
+#nel 1932 questi sono i paesi che hanno partecipato: ARG, AUS, AUT, BEL, BRA, BUL, CAN, CHN, COL, CUB, DEN, ESA, ESP, EST, FIN, FRA, GBR, GER, GRE, GUA, HAI, HUN, IND, IRL, ITA, JPN, LAT, LUX, MEX, MON, NED, NOR, NZL, PER, PHI, POL, POR, ROU, RSA, SUI, SWE, TCH, TUR, URU, USA, VEN, YUG
+#47 paesi
+# USA ? il paese con pi? partecipanti, + 800
+ed_932 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_932) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1932 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 222 donne 
+sesso = ed_932 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weighlifting, Water Polo, Swimming, Speed Skating, Ski Jumping, Shooting, Sailing, Rowing, Nordic Combined, Modern Pentathlon, Ice Hockey, Hockey, Gymnastics, Figure Skating, Fencing, Equestrianism, Diving, Cycling, Cross Country Skiiing, Boxing, Bobsleigh, ASthletics, Art Competitions, Alpinism
+#25 sport
+# lo sport pi? praticato ?  Art Competitions
+ed_932 %>% 
+  group_by(Sport) %>% 
+  summarise(count = n())
+
+ggplot(data = ed_932) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 11 a 96 
+#et? dei parteciapnti con una medaglia : da 11 a 68 con NA
+#                                       da 14 a 96 senza NA
+ggplot(data = ed_932) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_932, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 11 GBR
+# atleta pi? vecchio: 96 USA 
+ggplot(data = ed_932, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: USA 
+n_med = ed_932 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1936
+```{r}
+# EDIZIONE 1936
+# sede: BErlino, GER  
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_936 = eventi %>%
+  filter(Year == "1936") 
+View(ed_936)
+
+#nel 1936 questi sono i paesi che hanno partecipato: YUG, USA, URU, TUR, TCH, SWE, SUI, RSA, ROU, POR, POL, PHI, PER, NZL, NOR, NED, MON, MLT, MEX, LUX, LIE, LAT, JPN, ITA, ISL, IND, HUN, GRE, GER, GBR, FRA, FIN, EST, ESP, EGY, DEN, CRC, COL, CHN, CHI, CAN, BUL, BRA, BOL, BER, BEL, AUT, AUS, ARG, AFG
+#50 paesi
+# GER ? il paese con pi? partecipanti, + 640
+ed_936 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_936) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1936 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 441 donne 
+sesso = ed_936 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightlifting, Water Polo, Swimming, Speed Skating, Ski Jumping, Shooting, Sailing, Rowing, Polo, Nordic Combined, Modern Pentathlon, Ice Hockey, Hockey, Handball, Gymnastics, Football, Figure Skating, Fencing, Diving, Cycling, Cross Country Skiing, Canoeing, Boxing, Bobsleing, Basketball, Athletics, Art Competitions, Alpinism, Alpine Skiing, Aeroneutics 
+# 32 sport
+# lo sport pi? praticato ? Athletics, ma anche Gymnastics 
+ed_936 %>% 
+  group_by(Sport) %>% 
+  summarise(count = n())
+
+ggplot(data = ed_936) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 11 a 74
+#et? dei parteciapnti con una medaglia : da 11 a 74 con NA
+#                                       da 12 a 72 senza NA
+ggplot(data = ed_936) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_936, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 11 JPN
+# atleta pi? vecchio: 74 BEL e USA 
+ggplot(data = ed_936, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: GER 
+n_med = ed_936 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1948
+```{r}
+# EDIZIONE 1948
+# sede:  London, UK 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_948 = eventi %>%
+  filter(Year == "1948") 
+view(ed_948)
+
+#nel 1948 questi sono i paesi che hanno partecipato: AFG, ARG, AUS, AUT, BEL, BER, BRA, BUL, CAN, CHI, CHN, COL, CUB, DEN, EGY, ESP, FIN, FRA, GBR, GRE, GUY, HUN, IND, IRI, IRL, IRQ, ISL, ITA, JAM, KOR, LIB, LIE, LUX, MEX, MLT, MON, MYA, NED, NOR, NZL, PAK, PAN, PER, PHI, POL, POR, PUR, ROU, RSA, SGP, SRI, SUI, SWE, SYR, TCH, TTO, TUR, URU, USA, VEN, YUG
+#61 paesi
+# GBR ? il paese con pi? partecipanti, + 600
+ed_948 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_948) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1948 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 44 donne 
+sesso = ed_948 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Water Polo, Tug-of-War, Tennis, Swimming, Shooting, Sailing, Rugby, Rowing, Racquets, Polo, Motorboating, Lacrosse, Jeu De Paume, Hockey, Gymnastics, Football, Figure Skating, Fencing, Diving, Cycling, Boxing, Athletics, Archery 
+#29 sport 
+# lo sport pi? praticato ? Athletics  
+ed_948 %>% 
+  group_by(Sport) %>% 
+  summarise(count = n())
+
+ggplot(data = ed_948) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 14 a 61
+#et? dei parteciapnti con una medaglia : da 14 a 61 con NA
+#                                       da 16 a 60 senza NA
+ggplot(data = ed_948) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_948, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 14 HUN
+# atleta pi? vecchio: 61 GBR
+ggplot(data = ed_948, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: GBR
+n_med = ed_948 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count))
+
+```
+
+# EDIZIONE 1952
+```{r}
+# EDIZIONE 1952
+# sede:  
+# ? stata un edizione 
+# hanno partecipato maschi e femmine  
+ed_952 = eventi %>%
+  filter(Year == "1952") 
+view(ed_952)
+
+#nel 1952 questi sono i paesi che hanno partecipato: AHO, ARG, AUS, AUT, BAH, BEL, BER, BRA, BUL, CAN, CHI, CHN, CUB, DEN, EGY, ESP, FIN, FRA, GBR, GER, GHA, GRE, GUA, GUY, HKG, HUN, INA, IND, IRI, IRL, ISL, ISR, ITA, JAM, JPN, KOR, LIB, LIE, LUX, MEX, MON, MYA, NED, NGR, NOR, NZL, PAK, PAN, PHI, POL, POR, PUR, ROU, RSA, SAA, SGP, SRI, SUI, SWE, TCH, THA, TTO, TUR, URS, URU, USA, VEN, VNM, YUG 
+#69 paesi
+# USA ? il paese con pi? partecipanti, + 500
+ed_952 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_952) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1952 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 629 donne 
+sesso = ed_952 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weighlifting, Water Polo, Swimming, Speed Skating, Ski Jumping, Shooting, Sailing, Rowing, Nordic Combined, Modern Pentathlon, Ice Hockey, Hockey, Gymnastics, Football, Figure Skating, Fencing, Equestrianism, Diving, Cycling, Cross Country Skiing, Canoeing, Boxing, Bobsleigh, Basketball, Athletics Alpine Skiing  27 
+#27 sport
+# lo sport pi? praticato ? Gymnastics 
+ed_952 %>% 
+  group_by(Sport) %>% 
+  summarise(count = n())
+
+ggplot(data = ed_952) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 12 a 65
+#et? dei parteciapnti con una medaglia : da 12 a 65 con NA
+#                                       da 14 a 59 senza NA
+ggplot(data = ed_952) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_952, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: FRA 12
+# atleta pi? vecchio: GBR 65
+ggplot(data = ed_952, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: USA
+n_med = ed_952 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1956
+```{r}
+# EDIZIONE 1956
+# sede: 
+# ? stata un edizione 
+# hanno partecipato maschi e femmine  
+ed_956 = eventi %>%
+  filter(Year == "1956") 
+view(ed_956)
+
+#nel 1956 questi sono i paesi che hanno partecipato: AFG, ARG, AUS, AUT, BAH, BEL, BER, BOL, BRA, BUL, CAM, CAN, CHI, COL, CUB, DEN, EGY, ESP, ETH, FIJ, FIN, FRA, GBR, GER, GRE, GUY, HKG, HUN, INA, IND, IRI, IRL, ISL, ISR,  ITA, JAM, JPN, KEN, KOR, LBR, LIB, LIE, LUX, MAL, MEX, MYA, NBO, NED, NGR, NOR, NZL, PAK, PER, PHI, POL, POR, PUR, ROU, RSA, SGP, SRI, SUI, SWE, TCH, THA, TPE, TTO, TUR, UGA, URS, URU, USA, VEN, VNM, YUG
+#75 paesi
+# USA ? il paese con pi? partecipanti, + 500
+ed_956 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_956) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1956 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 516 donne 
+sesso = ed_956 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Alpine Skiing, Athletics, Basketball, Bobsleigh, Boxing, Canoeing, Cross Country Skiing, Cycling, Diving, Equestrianism, Fencing, Figure Skating, Football, Gymnastics, Hockey, Ice Hockey, Modern Pentathlon, Nordic Combined, Rowing, Sailing, Shooting, Ski Jumping, Speed Skating, Swimming, Water Polo, Weightlifting, Wrestling
+#27 sport
+# lo sport pi? praticato ? Athletics 
+ed_956 %>% 
+  group_by(Sport) %>% 
+  summarise(count = n())
+
+ggplot(data = ed_956) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 12 a 67
+#et? dei parteciapnti con una medaglia : da 12 a 67 con NA
+#                                       da 14 a 54 senza NA
+ggplot(data = ed_956) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_956, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 12 GER, GBR
+# atleta pi? vecchio: 67 NED 
+ggplot(data = ed_956, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: URS
+n_med = ed_956 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1960
+```{r}
+# EDIZIONE 1960 
+# sede: 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_960 = eventi %>%
+  filter(Year == "1960") 
+view(ed_960)
+
+#nel 1960 questi sono i paesi che hanno partecipato: AFG, AHO, ARG, AUS, AUT, BAH, BEL, BER, BRA, BUL, CAN, CHI, COL, CUB, DEN, ESP, ETH, FIJ, FIN, FRA, GBR, GER, GHA, GRE, GUY,HAI, HKG, HUN, INA, IND, IRI, IRL, IRQ, ISL, ISR, ITA, JPN, KEN, KOR, LBR, LIB, LIE, LUX, MAL, MAR, MEX, MLT, MON, MYA, NED, NGR, NOR, NZL, PAK, PAN, PER, PHI, POL, POR, PUR, RHO, ROU, RSA, SGP, SMR, SRI, SUD, SUI, SWE, TCH, THA, TPE, TUN, TUR, UAR, UGA, URS, URU, USA, VEN, VNM, WIF, YUG, ZIM
+#84 paesi
+# USA, GER ? il paese con pi? partecipanti, + 500
+ed_960 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_960) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1960 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 516 donne 
+sesso = ed_960 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono:  Wrestling, Weightlifting, Water Polo, Swimming, Speed Skating, Ski Jumping, Shooting, Sailing, Rowing, Nordic Combined, Modern Pentathlon, Ice Hockey, Hockey, Gymnastics, Football, Figure Skating, Fencing, Equestrianism, Diving, Cycling, Cross Country Skiing, Canoeing, Boxing, Biathlon, Basketball, Athletics, Alpine Skiing
+#27 sport 
+# lo sport pi? praticato ? Gymnastics
+ed_960 %>% 
+  group_by(Sport) %>% 
+  summarise(count = n())
+
+ggplot(data = ed_960) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 11 a 65
+#et? dei parteciapnti con una medaglia : da 11 a 65 con NA
+#                                       da 13 a 55 senza NA
+ggplot(data = ed_960) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_960, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 11 RSA
+# atleta pi? vecchio: 65 GBR 
+ggplot(data = ed_960, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: URS
+n_med = ed_960 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1964
+```{r}
+# EDIZIONE 1964
+# sede: 
+# ? stata un edizione estiva e invernale 
+# hanno partecipato maschi e femmine  
+ed_964 = eventi %>%
+  filter(Year == "1964") 
+view(ed_964)
+
+#nel 1964 questi sono i paesi che hanno partecipato: AFG, AHO, ALG, ARG, AUS, AUT, BAH, BEL, BER, BOL, BRA, BUL, CAM, CAN, CGO, CHA, CHI, CIV, CMR, COL, CRC, CUB, DEN, DOM, EGY, ESP, ETH, FIN, FRA, GBR, GER, GHA, GRE, GUY, HKG, HUN, IND, IRI, IRL, IRQ, ISL, ISR, ITA, JAM, JPN, KEN, KOR, LBR, LIB, LIE, LUX, MAD, MAR, MAS, MEX, MGL, MLI, MON, MYA, NED, NEP, NGR, NIG, NOR, NZL, PAK, PAN, PER, PHI, POL, POR, PRK, PUR, ROU, SEN, SRI, SUI, SWE, TAN, TCH, THA, TPE, TTO, TUN, TUR, UGA, URS, URU, USA, VEN, VNM, YUG, ZAM, ZIM (94)
+#  ? il paese con pi? partecipanti, + 
+ed_964 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_964) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1964 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 880 donne 
+sesso = ed_964 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightlifting, Water Polo, Volleyball, Swimming, Speed Skating, Ski Jumping, Shooting, Sailing, Rowing, Nordic Combined, Modern Pentathlon, Lude, Judo, Ice Hockey, Hockey, Gymnastics, Football, Figure Skating, Fencing, Equestrianism, Diving, Cycling, Cross Country Skiing, Canoeing, Boxing, Bobsleigh, Blathlon, Basketball, Athletics, Alpine Skiing (31)
+# lo sport pi? praticato ? Gymnastics 
+ggplot(data = ed_964) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 12 a 60
+#et? dei parteciapnti con una medaglia : da 12 a 60 con NA
+#                                       da 14 a 60 senza NA
+ggplot(data = ed_964) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_964, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 12 MAS
+# atleta pi? vecchio: 60 CAN, ARG, SWE
+ggplot(data = ed_964, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: URS 
+n_med = ed_964 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+View(n_med)
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1968 
+```{r}
+# EDIZIONE 1968
+# sede: 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_968 = eventi %>%
+  filter(Year == "1968") 
+view(ed_968)
+
+#nel 1968 questi sono i paesi che hanno partecipato:  AFG, AHO, ALG, ARG, AUS, AUT, BAH, BAR, BEL, BER, BIZ, BOL, BRA, BUL, CAF, CAN, CHA, CHI, CIV, CMR, COD, COL, CRC, CUB, DEN, DOM, ECU, EGY, ESA, ESP, ETH, FIJ, FIN, FRA, FRG, GBR, GDR, GHA, GRE, GUA, GUI, GUY, HKG, HON, HUN, INA, IND, IRI, IRL, IRQ, ISL, ISR, ISV, ITA, JAM, JPN, KEN, KOR, KUW, LBA, LIB, LIE, LUX, MAD, MAR, MAS, MEX, MGL, MLI, MLT, MON, MYA, NCA, NED, NGR, NIG, NOR, NZL, PAK, PAN, PAR, PER, PHI, POL, POR, PUR, ROU, SEN, SGR, SLE, SMR, SRI, SUD, SUI, SUR, SWE, SYR, TAN, TCH, THA, TPE, TTP, TUN, TUR, UGA, URS, URU, USA, VEN, VNM, YUG, ZAM
+# 112 paesi partecipanti
+# USA ? il paese con pi? partecipanti, + 660
+ed_968 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_968) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1968 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 994 donne 
+sesso = ed_968 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightilfting, Water Polo, Volleyball, Swimming, Speed Skating, Ski Jumping, Shooting,Sailing, Rowing, Nordic Combined, Modern Pentathlon, Luge, Ice Hockey, Hockey, Gymnastics, Football, Figure Skating, Fencing, Equestrianism, Diving, Cycling, Cross Country Skiing, Canoening, Boxing, Bobsleigh, Biathlon, Basketball, Athletics, Alpine Skiing
+# 30 sport praticati
+# lo sport pi? praticato ? Gymnastics
+ggplot(data = ed_968) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 11 a 68
+#et? dei parteciapnti con una medaglia : da 11 a 68 con NA
+#                                       da 14 a 66 senza NA
+ggplot(data = ed_968) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_968, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 11 ROU, PUR
+# atleta pi? vecchio: 68 ESA
+ggplot(data = ed_968, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: URS
+n_med = ed_968 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1972 
+```{r}
+# EDIZIONE 1972
+# sede: 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_972 = eventi %>%
+  filter(Year == "1972") 
+view(ed_972)
+
+#nel 1972 questi sono i paesi che hanno partecipato: AFG, AHO, ALB, ALG, AUS, AUT, BAH, BAR, BEL, BEN, BER, BIZ, BOL, BRA, BUR, CAM, CAN, CGO, CHA, CHI, CIV, CMR, COL,  CRC, CUB, DEN, DOM, ECU, EGY, ESA, ESP, ETH, FIJ, FIN, FRA, FRG, GAB, GBR, GDR, GHA, GRE, GUA, GUY, HAI, HKG, HUN, INA, IND, IRI, IRL, ISR, ISV, ITA, JAM, JPN, KEN, KOR, KSA, KUW, LBR, LES, LIB, LIE, LUX, MAD, MAR, MAS, MAW, MEX, MGL, MLI, MLT, MON, MYA, NCA, NED, NEP, NGR, NIG, NOR, NZL, PAK, PAN, PAR, PER, PHI, POL, POR, PRK, PUR, ROU, SEN, SGP, SMR, SOM, SRI, SUD, SUI, SUR, SWE, SWZ, SYR, TAN, TCH, THA, TOG, TPE, TTO, TUN, TUR, UGA, URS, USA, VEN, VNM, YUG, ZAM 
+# 121 paesi partecipanti 
+# USA ? il paese con pi? partecipanti, + 720
+ed_972 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_972) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1972 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 1266 donne 
+sesso = ed_972 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightilting, Water Polo, Volleyball, Swimming, Speed Skating, Ski Jumping, Shooting, Sailing, Rowing, Nordic Combined, Modern Pentathlon, Lude, Judo, Ice Hockey, Hockey, Handball, Gymnastics, Football, Figure Skating, Fencing, Equestrianism, Diving, Cycling, Cross Country Skiing, Canoening, Boxing, Bobsleigh, Blathlon, Basketball, Athletics, Archery, Alpine Skiing
+# 33 sport praticati
+# lo sport pi? praticato ?  Athletics 
+ggplot(data = ed_972) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 12 a 69
+#et? dei parteciapnti con una medaglia : da 12 a 69 con NA
+#                                       da 13 a 60 senza NA
+ggplot(data = ed_972) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_972, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 12 AUT
+# atleta pi? vecchio: 69 GBR
+ggplot(data = ed_972, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: URS
+n_med = ed_972 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1976
+```{r}
+# EDIZIONE 1976
+# sede:  
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_976 = eventi %>%
+  filter(Year == "1976") 
+view(ed_976)
+
+#nel 1976 questi sono i paesi che hanno partecipato: AHO, AND, ANT, ARG, AUS, AUT, BAH, BAR, BEL, BER, BIZ, BOL, BRA, BUL, CAN, CAY, CHI, CIV, CMR, COL, CRC, CUB, DEN, DOM, ECU, EGY, ESP, FIJ, FIN, FRA, FRG, GBR, GDR, GRE, GUA, HAI, HKG, HON, HUN, INA, IND, IRI, IRL, ISL, ISR, ISV, ITA, JAM, JPN, KOR, KSA, KUW, LIB, LIE, LUX, MAR, MAS, MEX, MGL, MON, NCA, NED, NEP, NOR, NZL, PAK, PAN, PAR, PER, PHI, PNG, POL, POR, PRK, PUR, ROU, SEN, SGR, SMR, SUI, SUR, SWE, TCH, THA, TPE, TTO, TUN, TUR, URS, URU, USA, VEN, YUG
+# 93 paesi partecipanti
+# USA ? il paese con pi? partecipanti, + 700
+ed_976 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_976) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1976 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 1490 donne 
+sesso = ed_976 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightlifting, Water Polo, Volleyball, Swimming, Speed Skating, Ski Jumping, Shooting, Sailing, Rowing, Nordic Combined, Modern Pentathlon, Lude, Judo, Ice Hockey, Hockey, Handball, Gymnastics, Football, Figure Skating, Fencing, Equestrianism, Diving, Cycling, Cross Country Skiing, Canoening, Boxing, Bobsleigh, Biathlon, Basketball, Athletics, Archery, Alpine Skiing
+#  33 sport praticati
+# lo sport pi? praticato ? Athletics   
+ggplot(data = ed_976) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 12 a 70
+#et? dei parteciapnti con una medaglia : da 12 a 70 con NA
+#                                       da 13 a 61 senza NA
+ggplot(data = ed_976) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_976, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 12 PUR, CIV, ESP, URS
+# atleta pi? vecchio: 70 BIZ
+ggplot(data = ed_976, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: URS 
+n_med = ed_976 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1980
+```{r}
+# EDIZIONE 1980
+# sede:  
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_980 = eventi %>%
+  filter(Year == "1980") 
+view(ed_980)
+
+#nel 1980 questi sono i paesi che hanno partecipato: AFG, ALG, AND, ANG, ARG, AUS, AUT, BEL, BEN, BOL, BOT, BRA, BUL, CAN, CGO, CHN, CMR, COL, CRC, CUB, CYP, DEN, DOM, ECU ,ESP, ETH, FIN, FRA, FRG, GBR, GDR, GRE, GUA, GUI,  GUY, HUN, IND, IRL, IRQ, ISL, ITA, JAM, JOR, JPN, KOR, KUW, LAO, LBA, LES, LIB, LIE, LUX, MAD, MEX, MGL, MLI, MLT MOZ, MYA, NCA, NED, NEP ,NGR, NOR, NZL, PER, POL, POR, PRK, PUR, ROU, SEN, SEY, SLE, SMR, SRI, SUI, SWE, SYR, TAN, TCH, TTO, UGA, URS, USA, VEN, VIE, YUG, ZAM, ZIM
+# 90 paesi partecipanti 
+#  ? il paese con pi? partecipanti, + 
+ed_980 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_980) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1980 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 1358 donne 
+sesso = ed_980 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightlifting, Water Polo, Volleyball, Swimming, Speed Skating, Ski Jumping, Shooting, Sailing, Rowing, Nordic Combined, Modern Pentathlon, Lude, Judo, Ice Hockey, Hockey, Handball, Gymnastics, Football, Figure Skating, Fencing, Eqeustrianism, Diving, Cycling, Cross Country Sliing, Canoening, Boxing, Bobsleigh, Biathlon, Basketball, Athletics, Archery, Alpine Skiing
+# lo sport pi? praticato ? Athletics 
+ggplot(data = ed_980) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 13 a 70
+#et? dei parteciapnti con una medaglia : da 13 a 70 con NA
+#                                       da 14 a 57 senza NA
+ggplot(data = ed_980) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_980, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 13 NCA, MGL, ESP, GBR, POL, MOZ, ANG
+# atleta pi? vecchio: 70 BUL
+ggplot(data = ed_980, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: URS
+n_med = ed_980 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+```
+
+# EDIZIONE 1984
+```{r}
+# EDIZIONE 1984
+# sede: 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_984 = eventi %>%
+  filter(Year == "1984") 
+view(ed_984)
+
+#nel 1984 questi sono i paesi che hanno partecipato: AHO, ALG, AND, ANT, ARG, AUS, AUT, BAH, BAN, BAR, BEL, BEN, BER, BHU, BIZ, BOL, BOT, BRA, BRN, BUL, CAF, CAN, CAY, CGO, CHA, CHI, CHN, CIV, CMR, COD, COL, CRC, CYP, DEN, DJI, DOM, ECU, EGY, ESA, ESP, FIJ, FIN, FRA, FRG, GAB, GAM, GBR, GDR, GEQ, GHA, GRE, GRN, GUA, GUI, GUY, HAI, HKG, HON, HUN, INA, IND, IRL, IRQ, ISL, ISR, ISV, ITA, IVB, JAM, JOR, JPN, KEN, KOR, KSA, KUW, LBR, LES, LIB, LIE, LUX, MAD, MAA, MAS, MAW, MEZ, MGL, MLI, MLT, MON, MOZ, MRI, MTN, MYA, NCA, NED, NEP, NGR, NIG, NOR, NZL, OMA, PAK, PAN, PAR, PER, PHI, PNG, POL, POR, PRK, PUR, QAT, ROU, RWA, SAM, SEN ,SEY, SGP, SLE, SMR, SOL, SOM, SRI, SUD, SUI, SUR, SWE, SWZ, SYR, TAN, TGA, THA, TOG, TPE, TTO, TUN, TUR, UAE, UGA, URS, URU, USA, VEN, YAR, YUG, ZAM, ZIM 
+# 148 paesi partecipanti 
+# USA ? il paese con pi? partecipanti, + 840
+ed_984 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_984) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1984 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 1844 donne 
+sesso = ed_984 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightilfing, Water Polo, Volleyball, Synchronized Swimming, Swimming, Speed Skating, Ski Jumping, Shooting, Sailing, Rowing, Rhythmic Gymnastics, Nordic Combined, Modern Pentathlon, Lude, Judo, Ice Hockey, Hockey, Handball, Gymnastics, Football, Figure Skating, Fencing, Equestrianism, Diving, Cycling, Cross Country Skiing, Canoening, Boxing, Bobsleigh, Blathlon, Basketball, Athletics, Archery, Alpine Sl?kiing
+# 35 sport praticati 
+# lo sport pi? praticato ? Athletics   
+ggplot(data = ed_984) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 12 a 60
+#et? dei parteciapnti con una medaglia : da 12 a 60 con NA
+#                                       da 14 a 52 senza NA
+ggplot(data = ed_984) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_984, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 12 BEL 
+# atleta pi? vecchio: 60 ESP
+ggplot(data = ed_984, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: USA
+n_med = ed_984 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1988
+```{r}
+# EDIZIONE 1988
+# sede:  
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_988 = eventi %>%
+  filter(Year == "1988") 
+view(ed_988)
+
+#nel 1988 questi sono i paesi che hanno partecipato: AFG, AHO, ALG, AND, ANG, ANT, ARG, ARU, ASA, AUS, AUT, BAH, BAN, BAR, BEL, BEN, BER, BHU, BIZ, BOL, BOT, BRA, BRN, BUL, BUR, CAF, CAN, CAY, CGO, CHA, CHI, CHN, CIV, CMR, COD, COK, COL, CRC, CYP, DEN, DJI, DOM, ECU, EGY, ESA, ESP ,FIJ, FIN, FRA, FRG, GAB, GAM, GBR, GDR, GEQ, GHA, GRE, GRN, GUA, GUI, GUM, GUY, HAI, HKG, HON, HUN, INA, IND, IRI, IRL, IRQ, ISL ,ISR, ISV, ITA, IVB, JAM, JOR, JPN, KEN, KOR, KSA, KUW, LAO, LBA, LBR, LES, LIB, LIE ,LUX, MAR, MAS, MAW, MDV, MEX, MGL, MLI, MLT, MON, MOZ, MRI, MTN, MUA, NED, NEP, NGR, NIG, NOR, NZL, OMA, PAK, PAN, PAR, PER, PHI, PNG, POL, POR, PRK, PUR, QAT, ROU, RWA, SAM, SEN ,SGP, SLE, SMR, SOL, SOM, SRI, SUD, SUI, SUR, SWE, SWZ, SYR, TAN, TCH, TGA, THA, TOG, TPE, TTO, TUN, TUR, UAE, UGA, URS, URU, USA, VAN ,VEN ,VIE, VIN, YAR, YMD, YUG, ZAM, ZIM 
+# 160 paesi partecipanti
+# USA ? il paese con pi? partecipanti, + 900 
+ed_988 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_988) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1988 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 2512 donne 
+sesso = ed_988 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightlifting, Water Polo, VOlleyball, Tennis, Table Tennis, Synchronized Swimming, Swimming, Speed Skating, Ski Jumping, Shooting, Sailing, Rowing, Rhythmic Gymnastics, Nordic Combined, Modern Pentathlon, Lude, Judo, Ice Hockey, Hockey, Handball, Gymnastics, Football, Figure Skating, Fencing, Equestrianism, Diving, Cycling, Cross Country Skiing, Canoening, Boxing, Bobsleigh, Blathlon, Basketball, Athletics, Archery, Alpine Skiing
+# 37 sport praticati 
+# lo sport pi? praticato ? Athletics
+ggplot(data = ed_988) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 11 a 70
+#et? dei parteciapnti con una medaglia : da 11 a 70 con NA
+#                                       da 14 a 56 senza NA
+ggplot(data = ed_988) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_988, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 11 CHN 
+# atleta pi? vecchio: 70 BAH
+ggplot(data = ed_988, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: URS
+n_med = ed_988 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1992
+```{r}
+# EDIZIONE 1992
+# sede:  
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_992 = eventi %>%
+  filter(Year == "1992") 
+view(ed_992)
+
+#nel 1992 questi sono i paesi che hanno partecipato: AHO, ALB, ALG, AND, ANG, ANT, ARG, ARU, ASA, AUS, AUT, BAH, BAN, BAR, BEL, BEN, BER, BHU, BIH, BIZ, BOL, BOT, BRA, BRN, BUL, BUR, CAF, CAN, CAY, CHA, CHI, CHN, CIV, CMR, COD, COK, COL, CRC, CRO CUB, CYP, DEN, DJI, DOM, ECU, EGY, ESA, ESP, EST, ETH, EUN, FIJ, FIN, FRA, GAB, GAM, GBR, GEQ, GER, GHA, GRE, GRN, GUA, GUI, GUM, GUY, HAI, HKG, HON, HUN, INA, IND, IOA, IRI, IRL, IRQ, ISL, ISR, ISV, ITA, IVB, JAM, JOR, JPN, KEN, KOR, KSA, KUW, LAO, LAT, LBA, LES, LIB, LIE, LTU, LUX, MAD, MAS, MAW, MDV, MEX, MGL, MLI, MLT, MON, MOZ, MRI, MTN, MYA, NAM, NCA, NED, NEP ,NGR, NIG, NOR, NZL, OMA, PAK, PAN ,PAR, PER, PHI, PNG, POL, POR, PRK, PUR, QAT, ROU, RSA, SAM, SEN, SEY, SGP, SLE, SLO ,SMR, SOL, SRI, SUD, SUI, SUR, SWE, SWZ, SYR, TAN, TCH, TGA, THA, TOG, TPE, TTO, TUN, TUR, UAE, UGA, URU, USA, VAN, VEN, VIE, VIN, YEM, YUG, ZAM, ZIM 
+# USA ? il paese con pi? partecipanti, + 960
+ed_992 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_992) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1992 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 3206 donne 
+sesso = ed_992 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightlifting, Water Polo, Volleyball, Tennis, Table Tennis, Synchronized Swimming, Swimming, Speed Skating, Ski Jumping, Short Track Speed Skating, Shooting, Sailing, Rowing, Rhythmic Gymnastics, Nordic Combined, Modern Pentathlon, Lude, Judo, Ice Hockey, Hockey, Handball, Gymnasitcs, Freestyle Skiing, Football, Figure Skating, Fencing, Equestrianism, Diving, Cycling, Cross Country Skiing, Canoening, Boxing, Bobsleigh, Biathlon, Basketball, Baseball, Badminton, Athletics, Archery, Alpine Skiing
+# 41 sport praticati 
+# lo sport pi? praticato ? Athletics 
+ggplot(data = ed_992) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 11 a 62
+#et? dei parteciapnti con una medaglia : da 11 a 62 con NA
+#                                       da 13 a 58 senza NA
+ggplot(data = ed_992) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_992, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 11 ESP
+# atleta pi? vecchio: 62 ISL, IVB 
+ggplot(data = ed_992, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: EUN 
+n_med = ed_992 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1994
+```{r}
+# EDIZIONE 1994
+# sede: 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_994 = eventi %>%
+  filter(Year == "1994") 
+view(ed_994)
+
+#nel 1908 questi sono i paesi che hanno partecipato: AND, ARG, ARM, ASA, AUS, AUT, BEL, BER, BIH, BLR, BRA, BUL, CAN, CHI, CHN, CRO, CYP, CZE, DEN, ESP, EST, FIJ, FIN, FRA, GBR, GEO, GER, GRE, HUN, ISL, ISR, ISV, ITA, JAM, JPN, KAZ, KGZ, KOR, LAT, LIE, LTU, LUX, MDA, MEX, MGL, MON, NED, NOR, NZL, POL, POR, PUR, ROU, RSA, RUS, SEN, SLO, SMR, SUI, SVK, SWE, TPE, TTO, TUR, UKR, USA, UZB 
+# 67 paesi partecipanti 
+# USA ? il paese con pi? partecipanti, + 230
+ed_994 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_994) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1994 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 522 donne 
+sesso = ed_994 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Speed Skating, Ski Jumping, Short Track Speed Skating, Nordic Combined, Lude, Ice Hockey, Freestyle Skiing, Figure Skating, Cross Country Skiing, Bobsleigh, Biathlon, Alpine Skiing 
+# lo sport pi? praticato ? Cross Country Skiing
+ggplot(data = ed_994) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 13 a 46
+#et? dei parteciapnti con una medaglia : da 13 a 46 con NA
+#                                       da 13 a 43 senza NA
+ggplot(data = ed_994) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_994, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 13 UKR, CHN, KOR
+# atleta pi? vecchio: 46 SMR
+ggplot(data = ed_994, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: GER 
+n_med = ed_994 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1996
+```{r}
+# EDIZIONE 1996
+# sede: 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_996 = eventi %>%
+  filter(Year == "1996") 
+view(ed_996)
+
+#nel 1996 questi sono i paesi che hanno partecipato: AFG, AHO, ALB, ALG, AND, ANG, ANT, ARG, ARM, ARU, ASA, AUS, AUT, AZE, BEH, BAN, BAR, BDI, BEL, BEN, BER, BHU, BIH, BIZ, BLR, BOL, BOT, BRA, BRN, BRU, BUL, BUR, CAF, CAM, CAN, CAY, CGO, CHA, CHI, CHM, CIV, CMR, COD, COK, COL, COM, CPV, CEC, CRO, CUB, CYP, CZE, DEN, DJI, DMA, DOM, ECU, DGY, ESA, ESP, EST, ETH, FIJ, FIN, FRA, GAB, GAM, GBR, GBS, GEO, GEQ, GER, GHA, GRE, GRN, GUA, GUI, GUM, GUY, HAI, HKG, HON, HUN, INA, IND, IRI, IRL, IRQ, ISL, ISE, ISV, IRA, IVB, JAM, JOR, JPN, KAZ, KEN, KGZ, KOR, KSA, KUW, LAO, LAT, LBA, LBR, LCA, LES, LIB, LIE, LTU, LUX, MAD, MAR, MAS, MAW, MDA, MDV, MEX, MGL, MKD, MLI, MLT, MON, MOZ, MRI, MTN, MYA, NAM, NCA, NED, NEP, NGR, NIG, NOR, NRU, NZL, OMA, PAK, PAN, PAR, PER, PGI, PLE, PNG, POL, POR, PRK, PUR, QAT, ROU, QAT, ROU, RSA, RUS, RWA, SAM, SCG, SEN, SEY, SGP, SKN, SEY, SGP, SKN, SLE, SLO, SMR, SOL, SOM,,SRI, STP, SUD, SUI, SUR, SVK, SWE, SWZ, SYR, TAN, TGA, THA, TJK, TKM, TOG, TPE, TTO, TUN, TUR, UAE, UGA, UKR, URU, USA, UZB, VAN, VEN, VIE, VIN, YEM, ZAM, ZIM
+# USA ? il paese con pi? partecipanti, + 830
+ed_996 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_996) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 1996 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 3512 donne 
+sesso = ed_996 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightliftihn, Volleyball, Tennis, Table Tennis, Synchronized Swimming, Swimming, Softball, Shooting, Sailing, Rowing, Rhythmic Gymnastics, Modern Pentathlon, Judo, Hockey, Handball, Gymnastics, Football, Fencing, Equestrianism, Diving, Cycling, Canoening, Boxing, Beach Volleyball, Basketball, Baseball, Badminton, Athletics, Archery
+# 31 sport praticati 
+# lo sport pi? praticato ?  Athletics 
+ggplot(data = ed_996) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 12 a 63
+#et? dei parteciapnti con una medaglia : da 12 a 63 con NA
+#                                       da 13 a 56 senza NA
+ggplot(data = ed_996) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_996, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 12 CAM
+# atleta pi? vecchio: 63 ITA, PUR
+ggplot(data = ed_996, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: USA
+n_med = ed_996 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 1998
+```{r}
+# EDIZIONE 1998
+# sede: 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_998 = eventi %>%
+  filter(Year == "1998") 
+view(ed_998)
+
+#nel 1998 questi sono i paesi che hanno partecipato: AND, ARG, ARM, AUS, AUT, AZE, BEL, BER, BIH, BLR, BRA, BUL, CAN, CHI, CHN, CRO, CYP, CZE, DEN, ESP, EST, FIN, FRA, GBR, GEO, GER, GRE, HUN, IND, IRI, IRL, ISL, ISR, ISV, ITA, JAM, JPN, KAZ, KEN, KGZ, KOR, LAT, LIE, LTU, LUX, MDA, MGL, MKD, MON, NED, NOR, NZL, POL, POR, PRK, PUR, ROU, RSA, RUS, SCG, SLO, SUI, SVK, SWE, TPE, TTO, TUR, UKR, URU, USA, UZB, VEN
+# 72 paesi partecipanti 
+# USA ? il paese con pi? partecipanti, + 280
+ed_998 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_998) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 198 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 788 donne 
+sesso = ed_998 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Speed Skating, Snowboarding, Ski Jumping, Short Track Speed Skating, Nordic Combined, Lude, Ice Hockey, Freestyle Skiing, FIgure Skating, Curling, Cross Country Skiing, Bobsleigh, Biathlon, Alpine Skiing
+# 14 sport praticati 
+# lo sport pi? praticato ? Cross Country Skiing 
+ggplot(data = ed_998) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 14 a 50
+#et? dei parteciapnti con una medaglia : da 14 a 50 con NA
+#                                       da 15 a 50 senza NA
+ggplot(data = ed_998) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_998, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 14 KOR
+# atleta pi? vecchio: 50 CAN
+ggplot(data = ed_998, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: FIN
+n_med = ed_998 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 2000
+```{r}
+# EDIZIONE 2000
+# sede: 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_000 = eventi %>%
+  filter(Year == "2000") 
+view(ed_000)
+
+#nel 2000 questi sono i paesi che hanno partecipato: AHO, ALB, ALG, AND, ANG, ANT, ARG, ARM, ARU, ASA, AUS, AUT, AZE, BAH, BAN, BAR, BDI, BEL, BEN, BER, BHU, BIH, BIZ, BLR, BOL, BOT, BRA, BRN, BRU, BUL, BUR, CAF, CAM, CAN, CAY, CGO, CHA, CHI, CHN, CIV, CHN, CIV, CMR, COD, COK, COL, COM, CPV, CRC, CRO, CUB, CYP, CZE, DEN, DJI, DMA, DOM, ECU, EGY, ERI, ESA, ESP, EST, ETH, FIJ, FIN, FRA, FSM, GAB, GAM, GBR, GBS, GEO, GEQ, GER, GHA, GRE, GRN, GUA, GUI, GUM, GUY, HAI, HKG, HON, HUN, INA, IND, IOA, IRI, IRL, IRQ, ISL, ISR, ISV, ITA, IVB, JAM, JOR, JPN, KAZ, KEN, KGZ, KOR, KSA, KUW, LAO, LAT, LBA, LBR, LCA, LES, LIB, LIE, LTU, LUX, MAD, MAR, MAS, MAW, MDA, MDV, MEX, MGL, MKD, MLI, MLT, MON, MOZ, MRI, MTN, MYA, NAM, NCA, NED, NEP, NGR, NIG, NOR, NRU, NZL, OMA, PAK, PAN, PAR, PER, PHI, PLE, PLW, PNG, POL, POR, PRK, PUR, QAT, ROU, RSA, RUS, RWA, SAM, SCG, SEN, SEY, SGP, SKN, SLE, SLO, SMR, SOL, SOM, SRI, STP, SUD, SUI, SUR, SVK, SWE, SWZ, SYR, TAN, TGA, THA, TJK, TKM, TOG, TPE, TTO, TUN, TUR, UAE, UGA, UKR, URU, USA, UZB, VAN, VEN, VIE, VIN, YEM, ZAM, ZIM 
+# 200 paesi partecipanti
+# AUS ? il paese con pi? partecipanti, + 780
+ed_000 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_000) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 2000 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 4064 donne 
+sesso = ed_000 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightlifting, Water Polo, Volleyball, Triathlon, Trampolining, Tennis, Taekwondo, Table Tennis, Synchronized Swimming, Swimming, Softball, Shooting, Sailing, Rowing, Rhythmic Gymnastics, Modern Pentathlon, Judo, Hockey, Handball, Gymnastics, Football, Fencing, Equestrianism, Diving, Cycling, Canoening, Boxing, Beach Volleyball, Basketball, Baseball, Badminton, Athletics, Archery
+# 34 sport praticati
+# lo sport pi? praticato ? Athletics    
+ggplot(data = ed_000) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 13 a 63
+#et? dei parteciapnti con una medaglia : da 13 a 63 con NA
+#                                       da 15 a 47 senza NA
+ggplot(data = ed_000) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_000, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 13 HKG, MDV
+# atleta pi? vecchio: 63 ISV
+ggplot(data = ed_000, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: USA
+n_med = ed_000 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 2002
+```{r}
+# EDIZIONE 2002
+# sede: Londra, UK 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_002 = eventi %>%
+  filter(Year == "2002") 
+view(ed_002)
+
+#nel 2002 questi sono i paesi che hanno partecipato: AND, ARG, ARM, AUS, AUT, AZE, BEL, BER, BIH, BLR, BRA, BUL, CAN, CHI, CHN, CMR, CRC, CRO, CYP, CZE, DEN, ESP, EST, FIJ, FIN,  FRA, GBR, GEO, GER, GRE, HKG, HUN, IND, IRI, IRL, ISL, ISR, ISV, ITA, JAM, JPN, KAZ, KEN, KGZ, KOR, LAT, LIB, LIE, LTU, MDA, MEX, MGL, MKD, MON, NED, NEP, NOR, NZL, POL, ROU, RSA, RUS, SCG, SLO, SMR, SUI, SVK, SWE, THA, TJK, TPE, TTO, TUR, UKR, USA, UZB, VEN
+# 77 paesi partecipanti 
+# USA ? il paese con pi? partecipanti, + 300
+ed_002 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_002) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 2002 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 885 donne 
+sesso = ed_002 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Speed Skating, Snowboarding, Ski Jumping, Skeleton, Short Track Speed Skating, Nordic Combined, Lude, Ice Hockey, Freestyle Skiing, Figure Skating, Curling, Cross Country Skiing, Bobsleigh, Biathlon, Alpine Skiing
+# 15 sport praticati
+# lo sport pi? praticato ?  Cross Country Skiing 
+ggplot(data = ed_002) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 15 a 48
+#et? dei parteciapnti con una medaglia : da 15 a 48 con NA
+#                                       da 15 a 45 senza NA
+ggplot(data = ed_002) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_002, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 15 HUN, MGL, KOR, CRO, SWE
+# atleta pi? vecchio: 48 ISV, USA, VEN
+ggplot(data = ed_002, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: FIN
+n_med = ed_002 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 2004
+```{r}
+# EDIZIONE 2004
+# sede:  
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_004 = eventi %>%
+  filter(Year == "2004") 
+view(ed_004)
+
+#nel 2004 questi sono i paesi che hanno partecipato: AFG, AHO, ALB, ALG, AND, ANG, ANT, ARG, ARM, ARU, ASA, AUS, AUT, AZE, BAH, BAN, BAR, BDI, BEL, BEN, BER, BHU, BIH, BIZ, BLR, BOL, BOT, BRA, BRN, BRU, BUL, BUR, CAF, CAM, CAN, CAY, CGO, CHA, CHI, CHN, CIV, CMR, COD, COK, COL, COM, CPV, CRC, CRO, CUB, CYP, CZE, DEN, DMA, DOM, ECU, EGY, ERI, ESA, ESP, EST, ETH, FIJ, FIN, FRA, FSM, GAB, GAM, GBR, GBS, GEO, GEQ, GER, GHA, GRE, GRN, GUA, GUI, GUM, GUY, HAI, HKG, HON, HUN, INA, IND, IRI, IRL, IRQ, ISL, ISR, ISV, ITA, IVB, JAM, JOR, JPN, KAZ, KEN, KGZ, KIR, KOR, KSA, KUW, LAO, LAT, LBA, LBR, LCA, LES, LIB, LIE, LTU, LUX, MAD, MAR, MAS, MAW, MDA, MDV, MEX, MGL, MKD, MLI, MLT, MON, MOZ, MRI, MTN, MYA, NAM, NCA, NED, NEP, NGR, NIG, NOR, NRU, NZL, OMA, PAK, PAN, PAR, PER, PHI, PLE, PLW, PNG, POL, POR, PRK, PUR, QAT, ROU, RSA, RUS, RWA, SAM, SCG, SEN, SEY, SGP, SKN, SLE, SLO, SMR, SOL, SOM, SRI, STP, SUD, SUI, SUR, SVK, SWE, SWZ, SYR, TAN, TGA, THA, TJK, TKM, TLS, TOG, TPE, TTO, TUN, TUR, UAE, UGA, UKR, URU, USA, UZB, VAN, VEN, VIE, VIN, YEM, ZAM, ZIM
+# 201 paesi partecipanti 
+#  ? il paese con pi? partecipanti, + 
+ed_004 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_004) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 2004 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 4288 donne 
+sesso = ed_004 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightlifting, Water Polo, Volleyball, Triathlon, Trampolining, Tennis, Taekwondo, Table Tennis, Synchronized Swimming, Swimming, Softball, Shooting, Sailing, Rowing, Rhythmic Gymnastics, Modern Pentathlon, Judo, Hockey, Handball, Gymnastics, Football, Fencing, Equestrianism, Diving, Cycling, Canoening, Boxing, Beach Volleyball, Basketball, Baseball, Badminton, Athletics, Archery
+# 34 sport praticati 
+# lo sport pi? praticato ?   
+ggplot(data = ed_004) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 13 a 57
+#et? dei parteciapnti con una medaglia : da 13 a 57 con NA
+#                                       da 15 a 50 senza NA
+ggplot(data = ed_004) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_004, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 13 MAD, MDV, PAK, HKG 
+# atleta pi? vecchio: 57 CAN, LAT
+ggplot(data = ed_004, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: USA
+n_med = ed_004 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 2006 
+```{r}
+# EDIZIONE 2006
+# sede: 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_006 = eventi %>%
+  filter(Year == "2006") 
+view(ed_006)
+
+#nel 2006 questi sono i paesi che hanno partecipato: ALB, ALG, AND, ARG, ARM, AUS, AUT, AZE, BEL, BER, BIH, BLR, BRA, BUL, CAN, CHI, CGN ,CEC, CRO, CYP, CZE, DEN, ESP, EST, ETH, FIN, FRA, GBR, GEO, GER, GRE, HKG, HUN, IND, IRI, IRL, ISL, ISR, ITA, JPN, KAZ, KEN, KGZ, KOR, LAT, LIB, LIE, LTU, LUX, MAD, MDA, MGL, MKD, MON, NED, NEP, NOR, NZL, POL, POR, PRK, ROU, RSA, RUS, SCG, SEN, SLO, SMR, SUI, SVK, SWE, THA, TJK, TPE, TUR, UKR, USA, UZB, VEN 
+# 79 paesi partecipanti 
+# USA ? il paese con pi? partecipanti, + 320 
+ed_006 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_006) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 2006 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 955 donne 
+sesso = ed_006 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Speed Skating, Snowboarding, Ski Jumping, Skeleton, Short Track Speed Skating, Nordic Combined, Lude, Ice Hockey, Freestyle Skiing, Figure Skating, Curling, Cross Country Skiing, Bobsleigh, Biatlon, Alpine Skiing
+# 15 sport praticati 
+# lo sport pi? praticato ? Cross Country Skiing  
+ggplot(data = ed_006) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 14 a 52
+#et? dei parteciapnti con una medaglia : da 14 a 52 con NA
+#                                       da 15 a 49 senza NA
+ggplot(data = ed_006) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_006, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 14 CHN 
+# atleta pi? vecchio: 52 VEN
+ggplot(data = ed_908, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: CAN 
+n_med = ed_006 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 2008 
+```{r}
+# EDIZIONE 2008
+# sede: 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_008 = eventi %>%
+  filter(Year == "2008") 
+view(ed_008)
+
+#nel 2008 questi sono i paesi che hanno partecipato: AFG, AHO, ALB, ALG, AND, ANG, ANT, ARG, ARM, ARU, ASA, AUS, AUT, AZE, BAH, BAN, BAR, BDI, BEL, BEN, BER, BHU, BIH, BIZ, BLR, BOL, BOT, BRA, BRN, BUL, BUR, CAF, CAM, CAN, CAY, CGO, CHA, CHI, CHN, CIV, CMR, COD, COK, COL, COM, CPV, CRC, CRO, CUB, CYP, CZE, DEN, DJI, DMA, DOM, ECU, EGY, ERI, ESA, ESP, EST, ETH, FIJ, FIN, FRA, FSM, GAB, GAM, GBR, GBS, GEO, GEQ, GER, GHA, GRE, GRN, GUA, GUI, GUM, GUY, HAI, HKG, HON, HUN, INA, IND, IRI, IRL, IRQ, ISL, ISR, ISV, ITA, IVB, JAM, JOR, JPN, KAZ, KEN, KGZ, KIR, KOR, KSA, KUW, LAO, LAT, LBA, LBR, LCA, LES, LIB, LIE, LTU, LUX, MAD, MAR, MAS, MAW, MDA, MDV, MEX, MGL, MHL, MKD, MLI, MLT, MNE, MON, MOZ, MRI, MTN, MYA, NAM, NCA, NED, NEP, NGR, NIG, NOR, NRU, NZL, OMA, PAK, PAN, PAR, PER, PHI, PLE, PLW, PNG, POL, POR, PRK, PUR, QAT, ROU, RSA, RUS, RWA, SAM, SEN, SEY, SGP, SKN, SLE, SLO, SMR, SOL, SOM, SRB, SRI, STP, SUD, SUI, SUR, SVK, SWE, SWZ, SYR, TAN, TGA, THA, TJK, TLS, TOG, TPE, TTO, TUN, TUR, TUV, UAE, UGA, UKR, URU, USA, UZB, VAN, VEN, VIE, VIN, YEM, ZAM, ZIM 
+# USA ? il paese con pi? partecipanti, + 760
+ed_008 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_008) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 2008 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 4603 donne 
+sesso = ed_008 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightifting, Water Polo, Volleyball, Triathlon, Trampolining, Tennis, Teakwondo, Tennis, Table Tennis, Synchronized Swimming, Swimming, Softball, Shooting, Sailing, Rowing, Rhythmic Gymnastics, Modern Pentathlon, Judo, Hockey, Handball, Gymnastics, Football, Fencing, Equestrianism, Diving, Canoening, Boxing, Beach Volleyball, Basketball, Baseball, Badminton, Athletics, Archery
+# 34 sport praticati 
+# lo sport pi? praticato ?  Athletics  
+ggplot(data = ed_008) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 12 a 67
+#et? dei parteciapnti con una medaglia : da 12 a 67 con NA
+#                                       da 15 a 61 senza NA
+ggplot(data = ed_008) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_008, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 12 CMR
+# atleta pi? vecchio: 67 JPN
+ggplot(data = ed_008, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: USA
+n_med = ed_008 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 2010 
+```{r}
+# EDIZIONE 2010
+# sede: 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_010 = eventi %>%
+  filter(Year == "2010") 
+View(ed_010)
+
+#nel 2010 questi sono i paesi che hanno partecipato: ALB, ALG, AND, ARG, ARM, AUS, AUT, AZE, BEL ,BER, BIH, BLR, BRA, BUL, CAN, CAT, CHI, CHN ,COL, CRO, CYP, CZE, DEN ,ESP ,EST, ETG, FIN, FRA, GBR, GEO, GER, GHA, GRE, HKG, HUN, IND, IRI, IRL, ISL, ISR, ITA, JAM, JPN, KAZ, KGZ, KOR, LAT, LIB, LIE, LTU, MAR, MDA, MEX, MGL, MKD, MNE, MON, NED, NOR, NZL, PAK, PER, POL, POR, PRK, ROU, RSA, RUS, SEN, SLO, SMR, SRB, SUI, SVK, SWE, TJK, TPE, TUR, UKR, USA, UZB
+# 82 paesi partecipanti
+# USA ? il paese con pi? partecipanti, + 340
+ed_010 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_010) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 2010 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 1032 donne 
+sesso = ed_010 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Speed Skating, Snowboarding, Ski Jumping, Skeleton, Short Track Speed Skating, Nordic Combined, Lude, Ice Hockey, Freestyle Skiing, Figure Skating, Curling, Cross Country Skiing, Bobsleigh, Biathlon, Alpine Skiing
+# 15 sport praticati
+# lo sport pi? praticato ?   Cross Country Skiing
+ggplot(data = ed_010) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 15 a 48
+#et? dei parteciapnti con una medaglia : da 15 a 48 con NA
+#                                       da 17 a 46 senza NA
+ggplot(data = ed_010) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_010, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 15 AUS, GEO, JPN, AUT
+# atleta pi? vecchio: 48 CRO
+ggplot(data = ed_010, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: USA
+n_med = ed_010 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 2012 
+```{r}
+# EDIZIONE 2012
+# sede: 
+# ? stata un edizione estiva
+# hanno partecipato maschi e femmine  
+ed_012 = eventi %>%
+  filter(Year == "2012") 
+View(ed_012)
+
+#nel 2012 questi sono i paesi che hanno partecipato: AFG, ALB, ALG, AND, ANG, ANT, ARG, ARM, ARU ,ASA, AUS, AUT, AZE, BAG, BAN, BAR, BDI, BEL, BEN, BER. BHU, BIH, BIZ, BLR, BOL, BOT, BRA, BRN, BRU, BUL, BUR, CAF, CAM, CAN, CAY, CGO, CHA, CHI, CHN, CIV, CMR, COD, COK, COL, COM, CPV, CRC, CRO, CUB, CYP, CZE, DEN, DJI, DMA, DOM, ECU ,EGY, ERI, ESA, ESP, EST, ETH, FIJ, FIN, FRA, FSM, GAB, GAM, GBR, GBS, GEO, GEQ, GER, GHA, GRE, GRN, GUA, GUI, GUM, GUY, HAI, HKG, HON, HUN, INA, IND, IOA, IRI, IRL, IRQ, ISL, ISR, ISV, ITA, IVB, JAM, JOR, JPN, KAZ, KEN, KGZ, KIR, KOR, KSA, KUW, LAO, LAT, LBA, LBR, LCA, LES, LIB, LIE, LTU ,LUX, MAS, MAR, MAS, MAW, MDA, MDV, MEX, MGL, MHL, MKD, MLI, MLT, MNE, MON, MOZ, MRI, MTN, MYA, NAM, NCA, NED, NEP, NGR, NIG, NOR, NRU, NZL, OMA, PAK PAN, PAR, PER, PGI ,PLE, PLW, PNG, POL, PRO, PRK, PUR, QAT, ROU, RSA, RUS, RSA, RUS, RWA, SAM, SEN, SEY, SGP, SKN, SLE, SLO, SMR, SOL, SOM, SRB, SRI, STP, SUD, SUI, SUR, SVH, SWE, SWZ, SYR, TAN, TGA, THA, TJK, TKM, TLS, TOG, TPE, TTO, TUN, TUR, TUV, UAE, UGA, UKR, URU, USA, UZB, VAN, VEN, VIE, VIN, YEM, ZAM, ZIM
+# 205 paesi partecipanti
+# USA ? il paese con pi? partecipanti, + 680 
+ed_012 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_012) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 2012 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 4646 donne 
+sesso = ed_012 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, Weightlifting, Water Polo, Volleyball, Triathlon, Trampolining, Tennis, Taekwondo, Table Tennis, Synchronized Swimming, Swimming, Shooting, Sailing, Rowing, Rhythmic Gymnastics, Modern Pentathlon, Judo, Hockey, Handball, Gymnastics, Football, Fencing, Equestrianism, Diving, Cycling, Canoening, Boxing, Beach Volleyball, Basketball, Badminton, Athletics, Archery
+# 32 sport praticati
+# lo sport pi? praticato ? Athletics 
+ggplot(data = ed_012) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 13 a 71
+#et? dei parteciapnti con una medaglia : da 13 a 71 con NA
+#                                       da 15 a 56 senza NA
+ggplot(data = ed_012) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_012, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 13 TOG
+# atleta pi? vecchio: 71 JPN
+ggplot(data = ed_012, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: USA
+n_med = ed_012 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 2014 
+```{r}
+# EDIZIONE 2014
+# sede: Londra, UK 
+# ? stata un edizione invernale 
+# hanno partecipato maschi e femmine  
+ed_014 = eventi %>%
+  filter(Year == "2014") 
+view(ed_014)
+
+#nel 2014 questi sono i paesi che hanno partecipato: ALB, AND,  ARG, ARM, AUS, AUT, AZE, BEL, BER, BIH, BLR, BRA, BUL, CAN, CAY, CHI, CHN, CRO, CYP, CZE, DEN, DMA, ESP, FIN, FRA, GBR, GEO, GER, GRE, HKG, HUN, IND, IOA, IRI, IRL, ISL, ISR, ISV, ITA, IVB, JAM, JPN, KAZ, KGZ, KOR, LAT, LIB, LIE, LTU, LUX, MAR, MDA, MEX, MGL, MKD, MLT, MNE, MON, NED, NEP ,NOR, NZL, PAK, PAR, PER ,PHI, POL, ROU, RUS SLO, SMR, SRB, SUI, SVK, SWE, TGA, THA, TJK, TLS, TOG, TPE, TUR, UKR, USA, UZB, VEN, ZIM 
+# 89 paesi partecipanti 
+# USA ? il paese con pi? partecipanti, + 360
+ed_014 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_014) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 2014 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 1102 donne 
+sesso = ed_014 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Speed Skating, Snowboarding, Ski Jumping, Skeleton, Short Track Speed Skating, Nordic Combined, Lude, Ice Hockey, Hockey, Freestyle Skiing, Curling, Cross Country Skiing, Bobsleigh, Biathlon, Alpine Skiing
+# 15 sport praticati 
+# lo sport pi? praticato ?  Cross Country Skiing
+ggplot(data = ed_014) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 15 a 55
+#et? dei parteciapnti con una medaglia : da 15 a 55 con NA
+#                                       da 15 a 43 senza NA
+ggplot(data = ed_014) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_014, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 15 USA, GER, JPN, AUT, FRA, RUS, SUI, GER, CZE
+# atleta pi? vecchio: 55 MEX
+ggplot(data = ed_014, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: URS
+n_med = ed_014 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+# EDIZIONE 2016 
+```{r}
+# EDIZIONE 2016
+# sede: Londra, UK 
+# ? stata un edizione invernale 
+# hanno partecipato maschi e femmine  
+ed_016 = eventi %>%
+  filter(Year == "2016") 
+view(ed_016)
+
+#nel 2016 questi sono i paesi che hanno partecipato: AFG, ALB, ALG, AND, ANG, ANT, ARG, ARM, ARU, ASA, AUS, AUT, AZE, BAH, BAN, BAR, BDI, BEL, BEN, BER, BHU, BIH, BIZ, BLR, BOL ,BOT, BRA, BRN, BRU, BUL, BUR, CAF, CAM, CAN, CAY, CGO, CHA, CHI, CGN, CIV, CMR, COD, COK, COL, COM, CPV, CRC, CRO, CUB, CYP, CZE, DEN, DJI, DMA, DOM, ECU, EGY, ERI, ESA, ESP, EST, ETH, FIJ, FIN, FRA, FSM, GAB, GAM, GBR, GBS, GEO, GEQ, GER, GHA, GRE, GRN, GUA, GUI, GUM, GUY, HAI, HKG, HON, HUN, INA, IND, IOA, IRI, IRL, IRQ, ISL, ISR, ISV, IRA ,IVB, JAM, JOR, JPN, KAZ, KEN, KGZ, KIR, KOR, KOS, KSA, LAO, LAT, LBA, LBR, LCA, LES, LIB, LIE, LTU, LUX, MAD, MAR, MAS, MAW, MDA, MDV, MEX, MGL, MHL, MKD, MLI, MLT, MNE, MON, MOZ, MRI ,MTN, MYA, NAM, NCA, NED, NEP, NGR, NIG, NOR, NRU, NZL, OMA, PAK, PAN, PAR, PER, PGI, PLE, PLW, PNG, POL, POR, PRK, PUR, QAT, ROT, ROU, RSA, RUS, RWA, SAM, SEN, SEY, SGP, SKN, SLE, SLO, SMR, SOL, SOM, SRB, 
+# 207 paesi partecipanti 
+# USA ? il paese con pi? partecipanti, + 710
+ed_016 %>%
+  group_by(NOC) %>%
+  summarise(count = n()) 
+
+ggplot(data = ed_016) + 
+  geom_bar(mapping = aes(x = NOC)) + 
+  coord_flip()
+
+#nel 2016 hanno partecipato maschi e femmine 
+# la maggior parte erano partecipanti maschi, solo 5031 donne 
+sesso = ed_016 %>% 
+  group_by(Name) %>% 
+  count(Sex)
+
+sesso %>% 
+  filter(Sex == "F")
+
+ggplot(data = sesso) +
+  geom_bar(mapping = aes(x = Sex)) 
+
+#gli sport praticati sono: Wrestling, weightligting, Water Polo, Volleyball, Triathlon, Tennis, Taekwondo, Table Tennis, Synchronized Swimming, Swimming, Shooting, Sailing, Rugby Sevens, Rowing, Rhythmic Gymnastics, Modern Pentathlon, Judo, Hockey, Handball, Gymnastics, Golf, Football, Fencing, Equestrianism, Diving, Cycling, Canoening, Boxing, Beach Volleyball, Basketball, Badminton, Athletics, Archery
+# 34 sport praticati 
+# lo sport pi? praticato ?  Athletics 
+ggplot(data = ed_016) +
+  geom_bar(mapping = aes(x = Sport)) + 
+  coord_flip()
+
+#et? dei partecipanti: da 13 a 62
+#et? dei parteciapnti con una medaglia : da 13 a 62  con NA
+#                                       da 15 a 58 senza NA
+ggplot(data = ed_016) + 
+  geom_point(mapping = aes(x = Medal, y = Age))
+
+ggplot(data = ed_016, mapping = aes(x = Medal, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# atleta pi? giovane: 13 ROU, NEP
+# atleta pi? vecchio: 62 NZL
+ggplot(data = ed_016, mapping = aes(x = NOC, y = Age)) +
+  geom_boxplot() +
+  coord_flip()
+
+# risultati medagliere
+# paese che ha preso pi? medaglie: USA
+n_med = ed_016 %>%
+  filter(Medal == "Gold" | Medal == "Silver" | Medal == "Bronze")%>%
+  group_by(NOC) %>%
+  summarise(count = n())
+
+ggplot(data = n_med) + 
+  geom_point(mapping = aes(x = NOC, y = count)) + 
+  coord_flip()
+
+```
+
+#Sport in cui vincono più i giovani
+```{r}
+#valutazione della conquista delle medaglie 
+a = eventi %>%
+  group_by(Sport) %>%
+  count(Medal) %>% 
+  pivot_wider(names_from = Medal, values_from = Medal) %>%
+  select(-"NA") 
+
+#seleziono medaglie oro
+b = a %>% 
+  select(n, Gold)
+
+ggplot(data = b) + 
+  geom_point(mapping = aes(x = Sport, y = n)) + 
+  coord_flip()
+
+#medaglie argento
+c = a %>% 
+  select(n, Silver)
+
+ggplot(data = c) + 
+  geom_point(mapping = aes(x = Sport, y = n)) + 
+  coord_flip()
+
+#medaglie bronzo
+d = a %>% 
+  select(n, Bronze)
+
+ggplot(data = d) + 
+  geom_point(mapping = aes(x = Sport, y = n)) + 
+  coord_flip()
+```
+
+```{r}
+#atleta più giovane e più vecchio 
+z = eventi %>% 
+  group_by(Sport) %>% 
+  count(Age, Medal)
+
+#Gymnastics, Bronze
+z %>% 
+  filter(Age == "10")
+```
+
+```{r}
+z = eventi %>% 
+  group_by(Sport) %>% 
+  count(Age, Medal) 
+
+ggplot(z) + 
+  geom_point(aes(Age, n, color = Medal))
+
+#giovani 10 -> 30
+g = z %>% 
+  filter(Age >= 10 & Age < 30) %>% 
+  filter(Medal == "Gold"| Medal == "Silver"| Medal == "Bronze")
+
+ggplot(g) + 
+  geom_point(aes(Age, n, color = Medal))
+
+ggplot(g) +
+  geom_point(aes(Age, n, color = Medal)) +
+  geom_smooth(aes(Age, n, linetype = Medal))
+```
+
+```{r}
+z = eventi %>% 
+  group_by(Sport) %>% 
+  count(Age, Medal)
+
+#giovani 10 -> 30
+# sport: Aeronautics, Alpine Skiing, Alpinism, Archery, Art Competitions, Athletics, Badminton, Baseball, Basketball, Basque Pelota, Beach Volleyball, Biathlon, Bobsleigh, Boxing, Canoening, Cricket, Croquet, Cross Country Skiing, Curling, Cycling, Diving, Equestrianism, Fencing, Figure Skiing, Football, Freestyle Skiing, Golf, Gymnastics, Handball, Hockey, Ice Hockey, Jeu De Paume, Judo, Lacrosse, Luge, Military Ski Patrol, Modern Pentathlon, Motorboating, Nordic Combined, Polo, Racquets, Rhythmic Gymnastics, Rowing, Rugby, Rugby Sevens,  Sailing, Shooting, Short Track Speed Skating, Skeleton, Ski Jumping, Snowboarding, Softball, Speed Skating, Swimming, Synchronized Swimming, Table Tennis, Taekwondo, Tennis, Trampolining, Triathlon, Tug-Of-War, Volleyball, Water Polo, Weightlifting, Wrestling 
+g = z %>% 
+  filter(Age >= 10 & Age < 30) %>% 
+  filter(Medal == "Gold"| Medal == "Silver"| Medal == "Bronze")
+
+ggplot(g) + 
+  geom_bar(aes(Sport, fill = Medal)) + 
+  coord_flip()
+
+ggplot(g) + 
+  geom_bar(aes(Sport, fill = Medal), position = "dodge") + 
+  coord_flip()
+
+#medaglie oro 
+go = g %>% 
+  filter(Medal == "Gold")
+
+ggplot(go) +
+  geom_bar(aes(Sport)) + 
+  coord_flip() + 
+  scale_fill_distiller(palette = "Greens")
+
+#medaglie argento 
+ga = g %>% 
+  filter(Medal == "Gold")
+
+ggplot(ga) +
+  geom_bar(aes(Sport)) + 
+  coord_flip()
+
+
+#medaglie bronzo
+gb = g %>% 
+  filter(Medal == "Gold")
+
+ggplot(gb) +
+  geom_bar(aes(Sport)) + 
+  coord_flip()
+```
+
+```{r}
+z = ed_96 %>% 
+  group_by(Sport) %>%
+  count(Age, Medal) 
+
+ggplot(z) + 
+  geom_point(aes(Age, n, color = Medal))
+
+g = z %>% 
+  filter(Medal == "Gold"| Medal == "Silver"| Medal == "Bronze")
+
+ggplot(g) + 
+  geom_point(aes(Age, n, color = Medal))
+
+ggplot(g) + 
+  geom_point(aes(Age, n, color = Medal)) + 
+  facet_wrap(~ Medal, nrow = 2)
+
+ggplot(g) +
+  geom_smooth(aes(Age, n, linetype = Medal))
+```
+
+```{r}
+z = ed_900 %>% 
+  group_by(Sport) %>%
+  count(Age, Medal) 
+
+ggplot(z) + 
+  geom_point(aes(Age, n, color = Medal))
+
+zz = z %>% 
+  filter(Medal == "Bronze" | Medal == "Silver" | Medal == "Gold")
+
+ggplot(zz) + 
+  geom_point(aes(Age, n, color = Medal))
+
+#giovani
+g = z %>% 
+  filter(Age >= 10 & Age < 30) %>% 
+  filter(Medal == "Gold"| Medal == "Silver"| Medal == "Bronze")
+
+ggplot(g) + 
+  geom_point(aes(Age, n, color = Medal))
+
+ggplot(g) + 
+  geom_point(aes(Age, n, color = Medal)) + 
+  facet_wrap(~ Medal, nrow = 2)
+
+ggplot(g) +
+  geom_smooth(aes(Age, n, linetype = Medal))
+```
+
+#Sport in cui vincono più gli adulti 
+```{r}
+#atleta più giovane e più vecchio 
+z = eventi %>% 
+  group_by(Sport) %>% 
+  count(Age, Medal)
+
+#Art Competitions
+z %>% 
+  filter(Age == "88")
+```
+
+```{r}
+z = eventi %>% 
+  group_by(Sport) %>% 
+  count(Age, Medal) 
+
+ggplot(z) + 
+  geom_point(aes(Age, n, color = Medal))
+
+#vecchi 50 -> 88
+v = z %>% 
+  filter(Age >=50 & Age < 88) %>% 
+  filter(Medal == "Gold"| Medal == "Silver"| Medal == "Bronze")
+
+ggplot(v) + 
+  geom_point(aes(Age, n, color = Medal))
+
+ggplot(v) +
+  geom_point(aes(Age, n, color = Medal)) +
+  geom_smooth(aes(Age, n, linetype = Medal))
+```
+
+```{r}
+z = eventi %>% 
+  group_by(Sport) %>% 
+  count(Age, Medal)
+
+#vecchi 50 -> 88
+# sport: Shooting, Sailing, Rowing, Roque, Golf, Fencing, Equestrianism, Curling, Croquet, Art Competitions, Archery, Alpinism
+v = z %>% 
+  filter(Age >=50 & Age < 88) %>% 
+  filter(Medal == "Gold"| Medal == "Silver"| Medal == "Bronze")
+
+ggplot(v) + 
+  geom_bar(aes(Sport, fill = Medal)) + 
+  coord_flip()
+
+ggplot(v) + 
+  geom_bar(aes(Sport, fill = Medal), position = "dodge") + 
+  coord_flip()
+
+#medaglie oro 
+# 1: Roque, Fencing, Croquet, Alpinism
+# 6: Archery
+# 7: Art Competitions, Equestrianism, Shooting
+# 8: Sailing
+vo = v %>% 
+  filter(Medal == "Gold")
+
+ggplot(vo) +
+  geom_bar(aes(Sport)) + 
+  coord_flip()
+
+#medaglie argento
+# 1: Roque, Fencing, Croquet, Alpinism
+# 2: Curling
+# 6: Archery
+# 7: Art Competitions, Equestrianism, Shooting
+# 8: Sailing
+va = v %>% 
+  filter(Medal == "Gold")
+
+ggplot(va) +
+  geom_bar(aes(Sport)) + 
+  coord_flip()
+
+#medaglie bronzo
+# 1: Alpinism, Corquet, Fencing, Roque
+# 2: Curling
+# 6: Archery
+# 7: Art Competitions, Equestrianism, Shooting
+# 8: Sailing
+vb = v %>% 
+  filter(Medal == "Gold")
+
+ggplot(vb) +
+  geom_bar(aes(Sport)) + 
+  coord_flip()
+```
+
+```{r}
+z = ed_900 %>% 
+  group_by(Sport) %>%
+  count(Age, Medal) 
+
+ggplot(z) + 
+  geom_point(aes(Age, n, color = Medal))
+
+zz = z %>% 
+  filter(Medal == "Bronze" | Medal == "Silver" | Medal == "Gold")
+
+ggplot(zz) + 
+  geom_point(aes(Age, n, color = Medal))
+
+#vecchi
+v = z %>% 
+  filter(Age >=50 & Age < 88) %>% 
+  filter(Medal == "Gold"| Medal == "Silver"| Medal == "Bronze")
+
+ggplot(v) + 
+  geom_point(aes(Age, n, color = Medal))
+
+ggplot(v) + 
+  geom_point(aes(Age, n, color = Medal)) + 
+  facet_wrap(~ Medal, nrow = 2)
+
+ggplot(v) +
+  geom_smooth(aes(Age, n, linetype = Medal))
+```
+
+# Partecipazione femminile 
+```{r}
+# analisi delle atlete femminili
+c = eventi %>% 
+  filter(Sex == "F") %>%
+  select(ID, Name, Age:Year, Sport, Medal) %>%
+  group_by(Year, Name) %>%
+  count(Name)
+
+ggplot(c) + 
+  geom_bar(aes(Year))
+
+# analisi degli atleti (maschi e femmine)
+d = eventi %>% 
+  group_by(Name) %>%
+  count(Name, Sex, Year)
+
+ggplot(d) + 
+  geom_bar(aes(Year, fill = Sex), position = "dodge")
+```
+
+```{r}
+# elenco degli stati che hanno partecipato ai giochi con atlete 
+f = eventi %>% 
+  filter(Sex == "F") %>%
+  group_by(NOC) %>%
+  count(NOC)
+
+ggplot(f) + 
+  geom_boxplot(aes(NOC, n)) +
+  coord_flip()
+```
+
+```{r}
+# numero di atlete partecipanti ad ogni edizione, raggruppate per stato  
+
+#1900: 23 atlete 
+# BOH, FRA, GBR, ITA, SUI, USA
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1900) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC))
+
+#1904: 6 atlete 
+# USA
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1904) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC))
+
+#1906: 6 atlete
+# FRA, GRE
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1906) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC))
+
+#1908: 44
+# GBR, GER, SWE
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1908) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC))
+
+#1912: 53
+# ANZ, AUT, BEL, DEN, FIN, FRA, GBR, GER, NOR, SWE
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1912) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC))
+
+#1920: 78
+# AUS, BEL, DEN, FIN, FRA, GBR, ITA, NED, NOR, NZL, RSA, SWE, TCH, USA
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1920) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC))
+
+#1924: 169
+# AUS, AUT, BEL, CAN, DEN, ESP, FIN, FRA, GBR, GRE, HUN, IND, IRL, ITA, LUX, NED, NOR, NZL, POL, RUS, SUI, SWE, TCH, USA
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1924) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1928: 340
+# USA, TCH, SWE, SUI, RSA, ROU, POL, NZL, NOR, NED, LUX, LTU, LAT, JPN, ITA, IRL, HUN, GER, GBR, FRA, FIN, DEN, CAN, BEL, AUT, AUS
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1928) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1932: 222
+# USA, SWE, RSA, POL, NZL, NOR, NED, MEX, JPN, IRL, HUN, GUA, GER, GBR, FRA, DEN, CAN, BRA, BEL, AUT, AUS
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1932) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1936: 441
+# YUG, USA, TUR, TCH, SWE, SUI, RSA, ROU, POL, NOR, NED, LUX, LAT, JPN, ITA, HUN, GRE, GER, GBR, FRA, FIN, EST, ESP, DEN, CHN, CHI, CAN, BRA, BEL, AUT, AUS, ARG
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1936) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1948: 523
+# YUG, USA, URU, TUR, TCH, SWE, SUI, RSA, POL, NZL, NOR, NED, MEX, LUX, KOR, JAM, ITA, ISL, IRL, HUN, GRE, GBR, FRA, FIN, DEN, CHN, CHI, CAN, BRA, BER, BEL, AUT, AUS, ARG
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1948) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1952: 629
+# YUG, VEN, USA, URS, TCH, SWE, SUI, SGP, SAA, RSA, ROU, POR, NZL, NOR, NED, MEX, KOR, JPN, JAM, ITA, ISR, IND, HUN, HKG, GUA, GER, GBR, FRA, FIN, DEN, CHI, CAN, BUL, BRA, BER, BEL, AUT, AUS, ARG
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1952) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1956: 516
+# YUG, USA, URS, TCH, SWE, SUI, SGP, RSA, ROU, POL, PHI, NZL, NOR, NED, MEX, MAL, LUX, KEN,JPN, ITA, ISR, IRL, IND, INA, HUN, GUY, GER, GBR, FRA, FIN, DEN, CUB, CHI, CAN, BUL, BRA, BEL, AUT, AUS, ARG
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1956) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1960: 757
+# ZIM, YUG VEN USA URS TUR TPE TCH SWE SUI RSA ROU RHO PUR POR POL PHI PAN NZL NOR NED MEX LUX KOR JPN ITA ISR ISL IRL INA HUN GUY GER GBR FRA FIN ESP DEN CUB CHI CAN BUL BRA BEL AUT AUS ARG
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1960) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1964: 880
+# ZIM, ZAM YUG VEN USA URS UGA TPE THA TCH SWE SUI ROU PUR PRK POR POL PHI PER PAN NZL NOR NGR NED MGL MEX MAS LUX KOR JPN JAM ITA ISR ISL IRL IRI IND HUN HKG GHA GER GBR FRA FIN ESP DEN CUB CAN BUL BRA BEL AUT AUS ARG 
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1964) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1968: 994
+# YUG VNM USA URU URS TPE TCH SWE SUI ROU PUR POR POL PHI PER NZL NOR NGR NED MGL MEX LUX LIE KOR KEN JPN JAM ITA ISR ISL IRL HUN GUA GHA GDR GBR FRG FRA FIN ESP ESA ECU DEN CUB CRC COL CHI CAN BUL BRA BEL AUT AUS ARG AHO 
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1968) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1972: 1266
+# ZAM YUG VEN USA URU URS UGA TUR TTO TPE TCH SYR SWE SUI SGP ROU PRK POL PHI PER NZL NOR NGR NED NCA MGL MEX MAW MAS MAR LUX LIE LIB KOR KEN JPN JAM ITA ISR ISL IRL IND INA HUN HAI GRE GHA GDR GBR FRG FRA FIN ESP DEN CUB COL CHI CAN CAM BUL BRA BEL BAR BAH AUT AUS ARG ALB
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1972) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1976: 1490
+# YUG VEN USA URU URS TUR TUN THA TCH SWE SUI SMR SGP SEN ROU PUR PRK POL PHI PER PAN NZL NOR NED MGL MEX LIE LIB KOR JPN JAM ITA ISV ISR ISL IRL IRI INA HUN HKG HAI GUA GRE GDR GBR FRG FRA FIN FIJ ESP DOM DEN CUB CRC COL CIV CAN BUL BRA BER BEL BAR BAH AUT AUS ARG 
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1976) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1980: 1358
+# ZIM YUG VIE USA URS TCJ TAN SYR SWE SUI SLE SEY SEN ROU PRK POR POL PER NZL NOR NGR NED NCA MOZ MLT MLI MEX MAD LIE LIB LBA LAO KOR JPN JAM ITA ISL IRL IND HUN GUY GRE GDR GBR FRG FRA FIN ETH ESP ECU DOM DEN CYP CUB CRC CMR CHN CGO CAN BUL BRA BEN BEL AUT AUS ANG
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1980) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1984: 1845
+# ZIM YUG USA URU UGA ... 
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1984) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1988: 2513
+# ...
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1988) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1992: 3206
+# ...
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1992) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1994: 522
+# UZB USA UKR SWE SVK SUI SLO RUS RSA ROU POL NZL NOR NED MDA LTU LIE LAT KOR KGZ KAZ JPN ITA ISL HUN GRE GER GBR FRA FIN EST ESP CZE CYP CHN CAN BUL BLR BIH AUT AUS ARG AND
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1994) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1996: 3512
+# ...
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1996) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#1998: 788
+# VEN UZB USA UKR TPE SWE SVK SUI SLO SCG RUS RSA ROU PRK POR POL NZL NOR NED MKD MDA LTU LIE LAT KOR KAZ JPN ITA ISV ISR ISL HUN GRE GER GEO GBR FRA FIN EST ESP DEN CZE CRO CHN CAN BUL BLR BIH AZE AUT AUS ARM ARG AND 
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 1998) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#2000: 4065
+# ...
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 2000) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#2002: 885
+# VEN UZB USA UKR TUR SWE SVK SUI SLO SCG RUS ROU POL NZL NOR NED MGL MDA LTU LIE LIB LAT KOR KAZ JPN ITA ISR ISL IRL HUN HKG GRE GER GEO GBR FRA FIN EST ESP DEN CZE CRO CHN CHI CAN BUL BRA BLR AZE AUT AUS ARM ARG AND
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 2002) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#2004: 4289
+# ...
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 2004) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#2006: 955
+# UZB USA UKR TUR SWE SVK SUI SLO SCG RUS ROU PRK POL NZL NOR NED MON MKD MGL MDA LUX LTU LIE LIB LAT KOR KAZ JPN ITA ISR ISL IRL IND HUN HKG GRE GER GEO GBR FRA FIN EST ESP DEN CZE CRO CHN CHI CAN BUL BRA BLR BIH AZE AUT AUS ARM ARG ALG
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 2006) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#2008: 4603
+# ...
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 2008) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#2010: 1032
+# UZB USA UKR TUR SWE SVK SUI SRB SLO RUS ROU PRK POL PER NZL NOR NED MON MKD MGL MDA LTU LIE LIB LAT KOR KGZ KAZ JPN ITA ISR ISL IRL IRI HUN HKG GRE GER GEO GBR FRA FIN EST ESP DEN CZE CYP CRO COL CHN CHI CAN BUL BRA BLR BIH BEL AZE AUT AUS ARM ARG AND 
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 2010) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#2012: 4646
+# ...
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 2012) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#2014: 1102 
+# UZB USA UKR TUR TOG THA SWE SVK SUI SRB SMR SLO RUS ROU POR POL PER PAR NZL NOR NED MON MNE MLT MKD MGL MDA MAR LTU LIE LIB LAT KOR KAZ JPN ITA ISV ISR ISL IRL IRI HUN GRE GER GEO GBR FRA FIN EST ESP DEN CZE CRO CHN CHI CAN BUL BRA BLR BIH BEL AZE AUT AUS ARM ARG AND ALB
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 2014) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+
+#2016: 5031
+# ...
+d = eventi %>% 
+  filter(Sex == "F") %>%
+  filter(Year == 2016) %>%
+  select(-Sex, -Season) %>%
+  group_by(NOC, Name) %>%
+  count(NOC)
+ggplot(d) + 
+  geom_bar(aes(NOC)) + 
+  coord_flip()
+```
+
+
+# Paesi che hanno partecipato con atleti giovani 
+```{r}
+#differenza di NOC tra tot atleti e atleti giovani 
+# 1896: -2
+# 1900: -4
+# 1904: -2
+# 1906: -2
+# 1908: -2
+# 1912: -2
+# 1920: -2
+# 1924: -3
+# 1928: 0
+# 1932: -11
+# 1936: -1
+# 1948: -5
+# 1952: 0
+# 1956: -5
+# 1960: 0
+# 1964: -4
+# 1968: -7
+# 1972: -6
+# 1976: -1
+# 1980: -1
+# 1984: -3
+# 1988: -2
+# 1992: 0
+# 1994: -7
+# 1996: -2
+# 1998: -6
+# 2000: 0
+# 2002: -3
+# 2004: 0
+# 2006: -9
+# 2008: 0
+# 2010: -8 
+# 2012: 0
+# 2014: -7
+# 2016: 0
+
+
+#numero di atleti per edizione 
+tot = eventi %>%
+  group_by(Year, ID, Name) %>%
+  count() 
+Gtot = ggplot(tot) + 
+  geom_bar(aes(Year))
+#numero di atleti giovani per edizione 
+gio = eventi %>%
+  filter(Age < 30) %>%
+  group_by(Year, ID, Name) %>%
+  count()
+Ggio = ggplot(gio) +
+  geom_bar(aes(Year))
+grid.arrange(Gtot, Ggio, ncol = 2)
+
+#numero di nazioni per edizione 
+tn = eventi %>%
+  group_by(Year, NOC) %>%
+  count()
+Gtn = ggplot(tn) + 
+  geom_bar(aes(Year))
+
+gn = eventi %>%
+  filter(Age < 30) %>%
+  group_by(Year, NOC) %>%
+  count()
+Ggn = ggplot(gn) + 
+  geom_bar(aes(Year))
+grid.arrange(Gtn, Ggn, ncol = 2)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
